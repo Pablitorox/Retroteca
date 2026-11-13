@@ -1,0 +1,48 @@
+/* Tela de jogo (dentro do iframe). Fundo preto puro e nada animando por cima do canvas enquanto joga. */
+@font-face { font-family: 'Sora'; src: url('/fonts/sora.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Figtree'; src: url('/fonts/figtree.woff2') format('woff2'); font-weight: 300 900; }
+html { font-size: calc(100vw / 120); }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #000; color: #eef2f8; font-family: 'Figtree', 'Segoe UI', sans-serif; user-select: none; }
+body.jogando { cursor: none; }
+[hidden] { display: none !important; }
+
+#jogo { position: fixed; inset: 0; }
+/* esconde a interface propria do EmulatorJS: o menu e o nosso */
+.ejs_menu_bar, .ejs_context_menu, .ejs_virtualGamepad_parent, .ejs_start_button, .ejs_loading_text,
+.ejs_settings_parent, .ejs_popup_container { display: none !important; }
+.ejs_parent { background: #000 !important; }
+.ejs_canvas { image-rendering: pixelated; }
+
+#carregando { position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 3rem;
+    background: radial-gradient(ellipse at 30% 40%, #141b2b 0, #090c13 70%); transition: opacity .35s; }
+#carregando.some { opacity: 0; pointer-events: none; }
+#carCapa, #menuCapa { height: 40vh; max-width: 30vw; object-fit: contain; filter: drop-shadow(0 1rem 2rem rgba(0,0,0,.6)); }
+.car-txt { width: 34rem; }
+.car-selo, .menu-selo { color: #1a8cff; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 0.6rem; }
+h1, h2 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; margin: 0 0 1.2rem; }
+h1 { font-size: 2.6rem; line-height: 1.1; }
+h2 { font-size: 2rem; line-height: 1.15; }
+.barra-car { height: 0.35rem; border-radius: 1rem; background: rgba(255,255,255,.1); overflow: hidden; }
+.barra-car i { display: block; height: 100%; width: 35%; border-radius: 1rem; background: #1a8cff; animation: vai 1.1s ease-in-out infinite; }
+@keyframes vai { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+#carEtapa { color: rgba(238,242,248,.7); font-size: 1.05rem; margin: 0.9rem 0 0; }
+.car-dica { color: rgba(238,242,248,.45); font-size: 0.95rem; margin-top: 2rem; }
+.pill { display: inline-block; padding: 0.05rem 0.5rem; border-radius: 0.35rem; background: rgba(255,255,255,.14); color: #fff; font-weight: 700; }
+#carregando.erro .barra-car { display: none; }
+#carregando.erro .car-selo { color: #F0605A; }
+
+#menu { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,11,.82); backdrop-filter: blur(8px); }
+.menu-caixa { display: flex; align-items: center; gap: 3rem; }
+.menu-lado { width: 26rem; }
+#menuOpcoes { display: flex; flex-direction: column; gap: 0.5rem; }
+.opcao { display: flex; align-items: center; justify-content: space-between; height: 3.3rem; padding: 0 1.2rem; border: 0; border-radius: 0.6rem;
+    background: rgba(255,255,255,.08); color: #eef2f8; font: inherit; font-size: 1.15rem; font-weight: 700; text-align: left; cursor: pointer; }
+.opcao small { color: rgba(238,242,248,.45); font-weight: 600; font-size: 0.85rem; }
+.opcao.foco { background: #fff; color: #000; } .opcao.foco small { color: #555; }
+.opcao.principal.foco { background: linear-gradient(180deg, #1a8cff, #0b63e5); color: #fff; } .opcao.principal.foco small { color: rgba(255,255,255,.75); }
+
+#aviso { position: fixed; z-index: 20; left: 50%; top: 2rem; transform: translateX(-50%); background: rgba(20,26,40,.92); border-left: 4px solid #1a8cff;
+    padding: 0.7rem 1.2rem; border-radius: 0.5rem; font-size: 1rem; opacity: 0; transition: opacity .25s; pointer-events: none; }
+#aviso.on { opacity: 1; }

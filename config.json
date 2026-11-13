@@ -1,0 +1,15 @@
+{
+  "port": 8790,
+  "romsDir": "E:/Jogos",
+  "retroarch": "",
+  "navegador": "",
+  "retomar": true,
+  "_modo": "web = emulador dentro da interface (EmulatorJS); nativo = abre o RetroArch instalado no PC (campo core)",
+  "sistemas": {
+    "gb":  { "nome": "Game Boy",         "curto": "Game Boy", "modo": "web", "coreWeb": "gambatte",         "threads": false, "extRom": ".gb",  "core": "gambatte_libretro",         "extensoes": [".gb", ".zip", ".7z"] },
+    "gbc": { "nome": "Game Boy Color",   "curto": "GB Color", "modo": "web", "coreWeb": "gambatte",         "threads": false, "extRom": ".gbc", "core": "gambatte_libretro",         "extensoes": [".gbc", ".gb", ".zip", ".7z"] },
+    "gba": { "nome": "Game Boy Advance", "curto": "GBA",      "modo": "web", "coreWeb": "mgba",             "threads": false, "extRom": ".gba", "core": "mgba_libretro",             "extensoes": [".gba", ".zip", ".7z"] },
+    "n64": { "nome": "Nintendo 64",      "curto": "N64",      "modo": "web", "coreWeb": "mupen64plus_next", "threads": true,  "extRom": ".z64", "core": "mupen64plus_next_libretro", "extensoes": [".z64", ".n64", ".v64", ".zip", ".7z"] },
+    "nds": { "nome": "Nintendo DS",      "curto": "DS",       "modo": "web", "coreWeb": "melonds",          "threads": true,  "extRom": ".nds", "core": "melondsds_libretro",        "extensoes": [".nds", ".zip", ".7z"] }
+  }
+}

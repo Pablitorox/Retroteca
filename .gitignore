@@ -1,0 +1,13 @@
+# emulador baixado por instalar-emulador.js (GPL-3, ~25 MB)
+public/emu/
+
+# dados locais: favoritos, recentes, tempo de jogo
+dados.json
+dados.json.tmp
+
+# cache (config do RetroArch nativo, downloads temporarios)
+.cache/
+
+# estado local do Claude Code
+.claude/scheduled_tasks.lock
+.claude/settings.local.json

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jogando</title>
+<link rel="preload" href="/emu/emulator.min.js" as="script">
+<link rel="stylesheet" href="jogar.css">
+</head>
+<body>
+<div id="jogo"></div>
+
+<div id="carregando">
+    <img id="carCapa" alt="">
+    <div class="car-txt">
+        <div class="car-selo">Carregando</div>
+        <h1 id="carNome"></h1>
+        <div class="barra-car"><i></i></div>
+        <p id="carEtapa">Preparando o emulador&hellip;</p>
+        <p class="car-dica">Menu do jogo: <span class="pill">Start</span> + <span class="pill">Select</span> ou <span class="pill">Esc</span></p>
+    </div>
+</div>
+
+<div id="menu" hidden>
+    <div class="menu-caixa">
+        <img id="menuCapa" alt="">
+        <div class="menu-lado">
+            <div class="menu-selo">Pausado</div>
+            <h2 id="menuNome"></h2>
+            <div id="menuOpcoes"></div>
+        </div>
+    </div>
+</div>
+
+<div id="aviso"></div>
+
+<script src="jogar.js"></script>
+</body>
+</html>
