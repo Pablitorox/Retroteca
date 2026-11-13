@@ -14,7 +14,8 @@ const cfg = Object.assign({
     navegador: '',
     sistemas: {}
 }, JSON.parse(fs.readFileSync(path.join(here, 'config.json'), 'utf8')));
-const ROMS = path.resolve(cfg.romsDir);
+// caminho relativo = relativo a esta pasta (no HD: "../Jogos" funciona com qualquer letra de unidade)
+const ROMS = path.resolve(here, cfg.romsDir);
 const DADOS = path.join(here, 'dados.json');
 const CACHE = path.join(here, '.cache');
 

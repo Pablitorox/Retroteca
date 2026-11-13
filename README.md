@@ -59,6 +59,25 @@ reiniciar e sair. Ao sair, o progresso é salvo sozinho.
 Saves: `<romsDir>\_saves\<console>\` (bateria, `.srm`) e `<romsDir>\_states\<console>\` (progresso, `.state.auto`),
 com os mesmos nomes do RetroArch, então valem nos dois modos.
 
+## Levar no HD externo
+
+```
+powershell -ExecutionPolicy Bypass -File publicar-hd.ps1 -Destino E:\
+```
+
+Monta o HD para abrir em qualquer PC com Node.js, com dois cliques em `Retroteca.exe`:
+
+```
+E:\
+  Retroteca.exe     lançador (sem janela de console; avisa se faltar o Node.js)
+  Retroteca\        servidor, interface, emulador e fontes
+  Jogos\            suas ROMs
+```
+
+No HD, o `config.json` aponta para `../Jogos`, então não importa a letra da unidade. Os favoritos e o histórico
+ficam no próprio HD (`Retroteca\dados.json`) e são preservados ao publicar de novo. O lançador é compilado na hora
+com o compilador C# que vem no Windows (fonte em `launcher/Retroteca.cs`). `Retroteca.exe --servidor` sobe só o servidor.
+
 ## Configuração (`config.json`)
 
 Por console: `modo` (`web` = emulador embutido, `nativo` = RetroArch instalado), `coreWeb`, `threads`, `extensoes`.
