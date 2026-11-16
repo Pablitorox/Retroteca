@@ -11,3 +11,7 @@ dados.json.tmp
 # estado local do Claude Code
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
+
+# versao web
+web/node_modules/
+web/.vercel/

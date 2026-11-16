@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090c13">
+<title>Retroteca</title>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<header>
+    <div class="marca"><span class="marca-ico">R</span><span>Retro<b>teca</b></span></div>
+    <button id="btnNuvem" class="btn sec" title="Sincronizar saves"><span id="nuvemIco">&#9729;</span> <span id="nuvemTxt">Nuvem</span></button>
+</header>
+
+<main>
+    <section id="vazio" hidden>
+        <h1>Sua coleção começa aqui</h1>
+        <p>Escolha ROMs de <b>GB</b>, <b>GBC</b> ou <b>GBA</b> (<code>.gb</code>, <code>.gbc</code>, <code>.gba</code> ou <code>.zip</code>) do aparelho ou do Google Drive.
+           Elas ficam só neste navegador: nada é enviado para o servidor.</p>
+    </section>
+    <div class="barra">
+        <h2 id="titulo">Jogos</h2>
+        <label class="btn"><input type="file" id="arquivos" multiple accept=".gba,.gbc,.gb,.zip"> + Adicionar jogos</label>
+    </div>
+    <div id="grade"></div>
+</main>
+
+<dialog id="dlgNuvem">
+    <form method="dialog">
+        <h2>Saves na nuvem</h2>
+        <p>Use o mesmo <b>código de sincronização</b> em todos os navegadores para continuar o jogo de onde parou.
+           Ele funciona como uma senha: escolha algo difícil de adivinhar (mínimo 8 caracteres).</p>
+        <input id="codigo" autocomplete="off" spellcheck="false" placeholder="ex.: pokemon-esmeralda-pablo-7x2">
+        <p class="obs">Sem código, os saves ficam só neste navegador. As ROMs nunca vão para a nuvem.</p>
+        <div class="acoes">
+            <button value="limpar" class="btn sec">Desligar</button>
+            <button value="ok" class="btn">Salvar</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="aviso"></div>
+<script src="db.js"></script>
+<script src="web.js"></script>
+</body>
+</html>

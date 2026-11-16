@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Jogando</title>
+<link rel="preconnect" href="https://cdn.emulatorjs.org">
+<link rel="stylesheet" href="jogar.css">
+</head>
+<body>
+<div id="jogo"></div>
+
+<div id="carregando">
+    <img id="carCapa" alt="">
+    <div class="car-txt">
+        <div class="car-selo">Carregando</div>
+        <h1 id="carNome"></h1>
+        <div class="barra-car"><i></i></div>
+        <p id="carEtapa">Preparando o emulador&hellip;</p>
+        <p class="car-dica">Menu do jogo: <span class="pill">Start</span> + <span class="pill">Select</span>, <span class="pill">Esc</span> ou o botão &#9776;</p>
+    </div>
+</div>
+
+<div id="menu" hidden>
+    <div class="menu-caixa">
+        <img id="menuCapa" alt="">
+        <div class="menu-lado">
+            <div class="menu-selo">Pausado</div>
+            <h2 id="menuNome"></h2>
+            <div id="menuOpcoes"></div>
+        </div>
+    </div>
+</div>
+
+<button id="btnMenu" aria-label="Menu do jogo" hidden>&#9776;</button>
+<div id="aviso"></div>
+
+<script src="db.js"></script>
+<script src="jogar.js"></script>
+</body>
+</html>

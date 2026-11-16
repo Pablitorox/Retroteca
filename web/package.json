@@ -1,0 +1,9 @@
+{
+  "name": "retroteca-web",
+  "private": true,
+  "type": "module",
+  "description": "Retroteca na web (Vercel): GB, GBC e GBA no navegador, saves na nuvem via Vercel Blob",
+  "dependencies": {
+    "@vercel/blob": "^2.9.0"
+  }
+}

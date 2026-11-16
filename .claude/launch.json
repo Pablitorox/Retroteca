@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["serve.js"],
       "port": 8790
+    },
+    {
+      "name": "retroteca-web",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["web/dev.mjs"],
+      "port": 8791
     }
   ]
 }
