@@ -44,15 +44,40 @@
         });
     }
 
+    // patch .bps sozinho: pede a ROM base num segundo seletor
+    function pedirBase(patches) {
+        // dialogo com botao proprio: o celular so abre o seletor a partir de um toque
+        return new Promise(function (ok) {
+            var dlg = $('#dlgBase'), inp = $('#base');
+            $('#basePatch').textContent = patches[0].name;
+            inp.onchange = function () { var f = inp.files && inp.files[0]; inp.value = ''; dlg.close(); ok(f || null); };
+            $('#baseCancelar').onclick = function () { dlg.close(); ok(null); };
+            dlg.showModal();
+        });
+    }
+    function processar(arqs) {
+        var patches = arqs.filter(function (f) { return /\.bps$/i.test(f.name); });
+        var roms = arqs.filter(function (f) { return !/\.bps$/i.test(f.name); });
+        // patch + ROM escolhidos juntos: a ROM e a base, nao um jogo a mais
+        var base = patches.length && roms.length ? Promise.resolve(roms.shift()) : patches.length ? pedirBase(patches) : Promise.resolve(null);
+        return base.then(function (b) {
+            if (patches.length && !b) return Promise.resolve({ ok: 0, erros: ['Sem a ROM base não dá para aplicar o patch'] });
+            var tarefas = patches.map(function (p) { return function () { return Retro.adicionarComPatch(p, b); }; })
+                .concat(roms.map(function (f) { return function () { return Retro.adicionar(f); }; }));
+            aviso(patches.length ? 'Aplicando o patch…' : 'Adicionando ' + tarefas.length + ' jogo(s)…', 30000);
+            var ok = 0, erros = [];
+            return tarefas.reduce(function (p, t) {
+                return p.then(function () { return t().then(function () { ok++; }, function (e) { erros.push(e.message); }); });
+            }, Promise.resolve()).then(function () { return { ok: ok, erros: erros }; });
+        });
+    }
+
     $('#arquivos').addEventListener('change', function (ev) {
         var arqs = Array.prototype.slice.call(ev.target.files || []);
         ev.target.value = '';
         if (!arqs.length) return;
-        aviso('Adicionando ' + arqs.length + ' jogo(s)…', 10000);
-        var ok = 0, erros = [];
-        arqs.reduce(function (p, f) {
-            return p.then(function () { return Retro.adicionar(f).then(function () { ok++; }, function (e) { erros.push(e.message); }); });
-        }, Promise.resolve()).then(function () {
+        processar(arqs).then(function (r) {
+            var ok = r.ok, erros = r.erros;
             montar();
             aviso(erros.length ? (ok ? ok + ' adicionado(s). ' : '') + erros[0] : ok + ' jogo(s) adicionado(s)', erros.length ? 6000 : 2600);
         });

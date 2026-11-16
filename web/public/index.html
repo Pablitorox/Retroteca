@@ -18,10 +18,11 @@
         <h1>Sua coleção começa aqui</h1>
         <p>Escolha ROMs de <b>GB</b>, <b>GBC</b> ou <b>GBA</b> (<code>.gb</code>, <code>.gbc</code>, <code>.gba</code> ou <code>.zip</code>) do aparelho ou do Google Drive.
            Elas ficam só neste navegador: nada é enviado para o servidor.</p>
+        <p>Hackroms em <code>.bps</code> (ex.: Pokémon Lazarus): escolha o patch e depois a ROM base. O patch é aplicado aqui mesmo.</p>
     </section>
     <div class="barra">
         <h2 id="titulo">Jogos</h2>
-        <label class="btn"><input type="file" id="arquivos" multiple accept=".gba,.gbc,.gb,.zip"> + Adicionar jogos</label>
+        <label class="btn"><input type="file" id="arquivos" multiple accept=".gba,.gbc,.gb,.zip,.bps"> + Adicionar jogos</label>
     </div>
     <div id="grade"></div>
 </main>
@@ -38,6 +39,16 @@
             <button value="ok" class="btn">Salvar</button>
         </div>
     </form>
+</dialog>
+
+<dialog id="dlgBase">
+    <h2>Falta a ROM base</h2>
+    <p>O patch <b id="basePatch"></b> precisa ser aplicado sobre a ROM original indicada no README da hack
+       (para o Pokémon Lazarus: <b>Pokémon Emerald (USA)</b>). O jogo é montado aqui, no navegador.</p>
+    <div class="acoes">
+        <button class="btn sec" id="baseCancelar">Cancelar</button>
+        <label class="btn"><input type="file" id="base" accept=".gba,.gbc,.gb"> Escolher ROM base</label>
+    </div>
 </dialog>
 
 <div id="aviso"></div>

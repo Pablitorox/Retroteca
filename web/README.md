@@ -5,6 +5,7 @@ Versão enxuta da Retroteca para rodar no navegador, hospedada na Vercel: **Game
 - As ROMs são escolhidas do aparelho (no Android/iPhone o seletor mostra o Google Drive) e ficam **só no navegador** (IndexedDB). Nada de ROM no servidor.
 - Os saves (`.srm` e progresso) ficam no navegador e, com um **código de sincronização**, também na nuvem (Vercel Blob, privado). Ao abrir um jogo, o save mais recente vence, então dá para trocar de navegador ou aparelho.
 - Emulador: EmulatorJS 4.2.3 (cores `mgba` e `gambatte`), carregado da CDN oficial `cdn.emulatorjs.org`.
+- Hackroms `.bps` (ex.: Pokémon Lazarus): escolha o patch e a ROM base; o patch é aplicado no navegador, com conferência de CRC da base.
 - Celular: controle virtual na tela e botão ☰ para o menu. PC: teclado ou controle, como na Retroteca original.
 
 ## Publicar na Vercel

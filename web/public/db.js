@@ -64,6 +64,62 @@
             return op('roms', 'readwrite', function (s) { return s.put(rom); }).then(function () { return rom; });
         });
     }
+    // ------------------------------------------------------------ patches .bps (hackroms)
+    var tabelaCrc = null;
+    function crc32(u8) {
+        if (!tabelaCrc) {
+            tabelaCrc = new Uint32Array(256);
+            for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; tabelaCrc[n] = c; }
+        }
+        var crc = 0xFFFFFFFF;
+        for (var i = 0; i < u8.length; i++) crc = tabelaCrc[(crc ^ u8[i]) & 0xFF] ^ (crc >>> 8);
+        return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+    // formato BPS (byuu/beat): devolve a ROM nova ou lanca um erro explicando o problema
+    function aplicarBps(patch, base) {
+        var p = new Uint8Array(patch), src = new Uint8Array(base), pos = 4;
+        if (p.length < 19 || String.fromCharCode(p[0], p[1], p[2], p[3]) !== 'BPS1') throw new Error('O patch não é um .bps válido');
+        var v = new DataView(p.buffer, p.byteOffset + p.length - 12, 12);
+        var crcBase = v.getUint32(0, true), crcFinal = v.getUint32(4, true);
+        if (crc32(p.subarray(0, p.length - 4)) !== v.getUint32(8, true)) throw new Error('O arquivo do patch está corrompido (baixe de novo)');
+        if (crc32(src) !== crcBase) throw new Error('Essa não é a ROM base certa para este patch (confira a versão indicada no README da hack)');
+        function num() {
+            var dado = 0, mult = 1;
+            for (;;) {
+                var x = p[pos++];
+                dado += (x & 0x7f) * mult;
+                if (x & 0x80) return dado;
+                mult *= 128; dado += mult;
+            }
+        }
+        num();                                   // tamanho da base (ja conferida pelo CRC)
+        var out = new Uint8Array(num());
+        var meta = num(); pos += meta;           // metadados (nao usar pos += num(): pos seria lido antes de avancar)
+        var o = 0, relSrc = 0, relOut = 0, fim = p.length - 12;
+        while (pos < fim) {
+            var d = num(), cmd = d % 4, len = Math.floor(d / 4) + 1, off;
+            if (cmd === 0) { out.set(src.subarray(o, o + len), o); o += len; }
+            else if (cmd === 1) { out.set(p.subarray(pos, pos + len), o); pos += len; o += len; }
+            else if (cmd === 2) {
+                off = num(); relSrc += (off & 1 ? -1 : 1) * Math.floor(off / 2);
+                out.set(src.subarray(relSrc, relSrc + len), o); relSrc += len; o += len;
+            } else {
+                off = num(); relOut += (off & 1 ? -1 : 1) * Math.floor(off / 2);
+                while (len--) out[o++] = out[relOut++];   // byte a byte: a copia pode sobrepor o que acabou de ser escrito
+            }
+        }
+        if (crc32(out) !== crcFinal) throw new Error('O patch foi aplicado, mas o resultado não confere');
+        return out;
+    }
+    function adicionarComPatch(patchFile, baseFile) {
+        return Promise.all([patchFile.arrayBuffer(), baseFile.arrayBuffer()]).then(function (b) {
+            var rom = aplicarBps(b[0], b[1]);
+            var ext = (/\.(gba|gbc|gb)$/i.exec(baseFile.name) || ['.gba'])[0].toLowerCase();
+            var nome = patchFile.name.replace(/\.bps$/i, '').replace(/\s*patch\s*/i, ' ').trim();
+            return adicionar(new File([rom], nome + ext));
+        });
+    }
+
     function listar() { return op('roms', 'readonly', function (s) { return s.getAll(); }); }
     function rom(id) { return op('roms', 'readonly', function (s) { return s.get(id); }); }
     function marcarJogado(id) {
@@ -134,7 +190,7 @@
     }
 
     window.Retro = {
-        SISTEMAS: SISTEMAS, adicionar: adicionar, listar: listar, rom: rom, remover: remover, marcarJogado: marcarJogado, capa: capa,
+        SISTEMAS: SISTEMAS, adicionar: adicionar, adicionarComPatch: adicionarComPatch, aplicarBps: aplicarBps, crc32: crc32, listar: listar, rom: rom, remover: remover, marcarJogado: marcarJogado, capa: capa,
         codigo: codigo, definirCodigo: definirCodigo, carregar: carregar, salvar: salvar, salvarAoFechar: salvarAoFechar
     };
 })();
