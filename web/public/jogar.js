@@ -10,6 +10,7 @@
     var id = new URLSearchParams(location.search).get('id') || '';
     var jogo = null, saindo = false, menuAberto = false, iniciado = false;
     var ultimoSrm = null;           // assinatura do ultimo .srm salvo (evita regravar igual)
+    var volume = (function () { try { var v = parseInt(localStorage.getItem('retroteca.volume'), 10); return isNaN(v) ? 80 : v; } catch (e) { return 80; } })();
 
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.body.classList.add('toque');
 
@@ -59,6 +60,7 @@
     // ------------------------------------------------------------ menu de pausa
     var OPCOES = [
         { id: 'continuar', txt: 'Continuar', dica: 'B', principal: true },
+        { id: 'volume', txt: 'Volume', dica: '' },
         { id: 'salvar', txt: 'Salvar progresso', dica: 'retomar daqui depois' },
         { id: 'carregar', txt: 'Voltar ao progresso salvo', dica: '' },
         { id: 'reiniciar', txt: 'Reiniciar o jogo', dica: '' },
@@ -71,12 +73,31 @@
             var b = document.createElement('button');
             b.className = 'opcao' + (o.principal ? ' principal' : '');
             b.textContent = o.txt;
-            if (o.dica) { var s = document.createElement('small'); s.textContent = o.dica; b.appendChild(s); }
+            if (o.dica || o.id === 'volume') { var s = document.createElement('small'); s.textContent = o.dica; b.appendChild(s); }
+            if (o.id === 'volume') b.id = 'opVolume';
             b.addEventListener('click', function () { focoMenu = i; escolher(); });
             box.appendChild(b);
         });
     }
-    function pintarMenu() { document.querySelectorAll('.opcao').forEach(function (b, i) { b.classList.toggle('foco', i === focoMenu); }); }
+    // volume (0 a 100, de 10 em 10): vale para todos os jogos e fica guardado neste navegador
+    function mudarVolume(passo, circular) {
+        var v = volume + passo;
+        volume = circular ? (v > 100 ? 0 : v) : Math.max(0, Math.min(100, v));
+        try { localStorage.setItem('retroteca.volume', volume); } catch (e) {}
+        aplicarVolume();
+        pintarVolume();
+    }
+    // setVolume so muda o som; o EmulatorJS volta a usar .volume ao despausar, entao guarda nos dois
+    function aplicarVolume() {
+        var e = window.EJS_emulator; if (!e) return;
+        try { e.volume = volume / 100; e.setVolume(e.volume); } catch (x) {}
+    }
+    function pintarVolume() {
+        var b = $('#opVolume'); if (!b) return;
+        b.querySelector('small').textContent = '◀ ' + (volume ? volume + '%' : 'mudo') + ' ▶';
+    }
+    function pintarMenu() {
+        pintarVolume(); document.querySelectorAll('.opcao').forEach(function (b, i) { b.classList.toggle('foco', i === focoMenu); }); }
     function abrirMenu() {
         if (!iniciado || menuAberto || saindo) return;
         menuAberto = true; focoMenu = 0;
@@ -95,6 +116,7 @@
     function escolher() {
         var o = OPCOES[focoMenu].id;
         if (o === 'continuar') return fecharMenu();
+        if (o === 'volume') return mudarVolume(10, true);   // toque/Enter: sobe e volta ao mudo depois de 100%
         if (o === 'sair') return sair();
         if (o === 'salvar') {
             Promise.all([salvarSrm(), salvarEstado()]).then(function (r) {
@@ -129,6 +151,7 @@
         ev.preventDefault(); ev.stopPropagation();
         if (ev.key === 'ArrowDown') { focoMenu = (focoMenu + 1) % OPCOES.length; pintarMenu(); }
         else if (ev.key === 'ArrowUp') { focoMenu = (focoMenu + OPCOES.length - 1) % OPCOES.length; pintarMenu(); }
+        else if ((ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') && OPCOES[focoMenu].id === 'volume') mudarVolume(ev.key === 'ArrowLeft' ? -10 : 10);
         else if (ev.key === 'Enter' || ev.key === ' ') escolher();
         else if (ev.key === 'Escape' || ev.key === 'Backspace') fecharMenu();
     }, true);
@@ -140,15 +163,16 @@
         for (var i = 0; i < pads.length; i++) {
             var p = pads[i]; if (!p || !p.connected) continue;
             var bt = function (n) { return p.buttons[n] && p.buttons[n].pressed; };
-            if (bt(0)) agora.a = 1; if (bt(1)) agora.b = 1; if (bt(12)) agora.cima = 1; if (bt(13)) agora.baixo = 1;
+            if (bt(0)) agora.a = 1; if (bt(1)) agora.b = 1; if (bt(12)) agora.cima = 1; if (bt(13)) agora.baixo = 1; if (bt(14)) agora.esq = 1; if (bt(15)) agora.dir = 1;
             if (bt(8) && bt(9)) agora.combo = 1; if (bt(16)) agora.home = 1;
-            var y = p.axes[1] || 0; if (y < -0.6) agora.cima = 1; if (y > 0.6) agora.baixo = 1;
+            var y = p.axes[1] || 0, x = p.axes[0] || 0; if (y < -0.6) agora.cima = 1; if (y > 0.6) agora.baixo = 1; if (x < -0.6) agora.esq = 1; if (x > 0.6) agora.dir = 1;
         }
         var novo = function (k) { return agora[k] && !antes[k]; };
         if (!iniciado && !saindo && novo('b') && $('#carregando').classList.contains('erro')) sair();
         else if (menuAberto) {
             if (novo('baixo')) { focoMenu = (focoMenu + 1) % OPCOES.length; pintarMenu(); }
             if (novo('cima')) { focoMenu = (focoMenu + OPCOES.length - 1) % OPCOES.length; pintarMenu(); }
+            if (OPCOES[focoMenu].id === 'volume' && (novo('esq') || novo('dir'))) mudarVolume(novo('esq') ? -10 : 10);
             if (novo('a')) escolher();
             else if (novo('b') || novo('home')) fecharMenu();
         } else if (iniciado && (novo('combo') || novo('home'))) abrirMenu();
@@ -194,7 +218,7 @@
         window.EJS_startOnLoaded = true;
         window.EJS_disableDatabases = true;      // a ROM ja esta no nosso IndexedDB; o core fica no cache do navegador
         window.EJS_threads = false;
-        window.EJS_volume = 0.8;
+        window.EJS_volume = volume / 100;
         window.EJS_color = '#1a8cff';
         window.EJS_backgroundColor = '#000000';
         window.EJS_Buttons = { playPause: false, restart: false, mute: false, settings: false, fullscreen: false, saveState: false,
@@ -213,6 +237,7 @@
         };
         window.EJS_onGameStart = function () {
             iniciado = true;
+            aplicarVolume();   // EJS_volume = 0 (mudo) seria ignorado
             document.body.classList.add('jogando');
             $('#btnMenu').hidden = false;
             $('#carregando').classList.add('some');
