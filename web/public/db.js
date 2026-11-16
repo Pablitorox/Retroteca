@@ -111,10 +111,31 @@
         if (crc32(out) !== crcFinal) throw new Error('O patch foi aplicado, mas o resultado não confere');
         return out;
     }
+    // ROM base dentro de .zip: le o primeiro arquivo pelo diretorio central (os tamanhos do
+    // cabecalho local podem vir zerados) e descompacta com o DecompressionStream do navegador
+    function abrirZip(buf) {
+        var v = new DataView(buf), fimDir = -1;
+        for (var i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) if (v.getUint32(i, true) === 0x06054b50) { fimDir = i; break; }
+        if (fimDir < 0) throw new Error('.zip inválido');
+        var cd = v.getUint32(fimDir + 16, true);
+        var metodo = v.getUint16(cd + 10, true), tam = v.getUint32(cd + 20, true);
+        var nome = new TextDecoder().decode(new Uint8Array(buf, cd + 46, v.getUint16(cd + 28, true)));
+        var loc = v.getUint32(cd + 42, true), ini = loc + 30 + v.getUint16(loc + 26, true) + v.getUint16(loc + 28, true);
+        var dados = new Uint8Array(buf, ini, tam);
+        if (metodo === 0) return Promise.resolve({ nome: nome, dados: dados.slice() });
+        if (metodo !== 8) throw new Error('.zip com compressão não suportada');
+        var ds = new Blob([dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return new Response(ds).arrayBuffer().then(function (b) { return { nome: nome, dados: new Uint8Array(b) }; });
+    }
+    function lerRomBase(file) {
+        return file.arrayBuffer().then(function (buf) {
+            return /\.zip$/i.test(file.name) ? abrirZip(buf) : { nome: file.name, dados: new Uint8Array(buf) };
+        });
+    }
     function adicionarComPatch(patchFile, baseFile) {
-        return Promise.all([patchFile.arrayBuffer(), baseFile.arrayBuffer()]).then(function (b) {
-            var rom = aplicarBps(b[0], b[1]);
-            var ext = (/\.(gba|gbc|gb)$/i.exec(baseFile.name) || ['.gba'])[0].toLowerCase();
+        return Promise.all([patchFile.arrayBuffer(), lerRomBase(baseFile)]).then(function (b) {
+            var rom = aplicarBps(b[0], b[1].dados);
+            var ext = (/\.(gba|gbc|gb)$/i.exec(b[1].nome) || ['.gba'])[0].toLowerCase();
             var nome = patchFile.name.replace(/\.bps$/i, '').replace(/\s*patch\s*/i, ' ').trim();
             return adicionar(new File([rom], nome + ext));
         });
