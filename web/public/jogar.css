@@ -60,3 +60,18 @@ body.toque .ejs_virtualGamepad_parent { display: block !important; }
     .car-txt, .menu-lado { width: 100%; max-width: 26rem; }
     h1 { font-size: 1.8rem; } h2 { font-size: 1.5rem; }
 }
+
+/* barra de volume do menu de pausa */
+.opcao.volume { gap: 1rem; cursor: default; }
+.opcao.volume span { flex: none; }
+.opcao.volume small { flex: none; width: 3.2rem; text-align: right; }
+.opcao.volume input { --v: 80%; flex: 1; min-width: 0; height: 2.2rem; margin: 0; background: none; cursor: pointer; -webkit-appearance: none; appearance: none; touch-action: none; }
+.opcao.volume input::-webkit-slider-runnable-track { height: 0.4rem; border-radius: 1rem; background: linear-gradient(90deg, #1a8cff var(--v), rgba(255,255,255,.2) var(--v)); }
+.opcao.volume input::-moz-range-track { height: 0.4rem; border-radius: 1rem; background: rgba(255,255,255,.2); }
+.opcao.volume input::-moz-range-progress { height: 0.4rem; border-radius: 1rem; background: #1a8cff; }
+.opcao.volume input::-webkit-slider-thumb { -webkit-appearance: none; width: 1.3rem; height: 1.3rem; margin-top: -0.45rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+.opcao.volume input::-moz-range-thumb { width: 1.3rem; height: 1.3rem; border: 0; border-radius: 50%; background: #fff; }
+.opcao.volume.foco input::-webkit-slider-runnable-track { background: linear-gradient(90deg, #1a8cff var(--v), rgba(0,0,0,.15) var(--v)); }
+.opcao.volume.foco input::-webkit-slider-thumb { background: #1a8cff; }
+.opcao.volume.foco input::-moz-range-track { background: rgba(0,0,0,.15); }
+.opcao.volume.foco input::-moz-range-thumb { background: #1a8cff; }

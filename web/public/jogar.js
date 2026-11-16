@@ -70,31 +70,45 @@
     function montarMenu() {
         var box = $('#menuOpcoes'); box.innerHTML = '';
         OPCOES.forEach(function (o, i) {
+            if (o.id === 'volume') return box.appendChild(linhaVolume(i));
             var b = document.createElement('button');
             b.className = 'opcao' + (o.principal ? ' principal' : '');
             b.textContent = o.txt;
-            if (o.dica || o.id === 'volume') { var s = document.createElement('small'); s.textContent = o.dica; b.appendChild(s); }
-            if (o.id === 'volume') b.id = 'opVolume';
+            if (o.dica) { var s = document.createElement('small'); s.textContent = o.dica; b.appendChild(s); }
             b.addEventListener('click', function () { focoMenu = i; escolher(); });
             box.appendChild(b);
         });
     }
-    // volume (0 a 100, de 10 em 10): vale para todos os jogos e fica guardado neste navegador
-    function mudarVolume(passo, circular) {
-        var v = volume + passo;
-        volume = circular ? (v > 100 ? 0 : v) : Math.max(0, Math.min(100, v));
+    // linha do volume: barra para puxar (toque/mouse) e setas/direcional de 5 em 5
+    function linhaVolume(i) {
+        var d = document.createElement('div');
+        d.className = 'opcao volume'; d.id = 'opVolume';
+        d.innerHTML = '<span>Volume</span><input type="range" min="0" max="100" step="1" aria-label="Volume"><small></small>';
+        var r = d.querySelector('input');
+        r.value = volume;
+        r.addEventListener('input', function () { focoMenu = i; definirVolume(+r.value); pintarMenu(); });
+        d.addEventListener('pointerdown', function () { focoMenu = i; pintarMenu(); });
+        return d;
+    }
+    // volume (0 a 100): vale para todos os jogos e fica guardado neste navegador
+    function definirVolume(v) {
+        volume = Math.max(0, Math.min(100, Math.round(v)));
         try { localStorage.setItem('retroteca.volume', volume); } catch (e) {}
         aplicarVolume();
         pintarVolume();
     }
+    function mudarVolume(passo) { definirVolume(volume + passo); }
     // setVolume so muda o som; o EmulatorJS volta a usar .volume ao despausar, entao guarda nos dois
     function aplicarVolume() {
         var e = window.EJS_emulator; if (!e) return;
         try { e.volume = volume / 100; e.setVolume(e.volume); } catch (x) {}
     }
     function pintarVolume() {
-        var b = $('#opVolume'); if (!b) return;
-        b.querySelector('small').textContent = '◀ ' + (volume ? volume + '%' : 'mudo') + ' ▶';
+        var d = $('#opVolume'); if (!d) return;
+        var r = d.querySelector('input');
+        if (+r.value !== volume) r.value = volume;
+        r.style.setProperty('--v', volume + '%');
+        d.querySelector('small').textContent = volume ? volume + '%' : 'mudo';
     }
     function pintarMenu() {
         pintarVolume(); document.querySelectorAll('.opcao').forEach(function (b, i) { b.classList.toggle('foco', i === focoMenu); }); }
@@ -116,7 +130,7 @@
     function escolher() {
         var o = OPCOES[focoMenu].id;
         if (o === 'continuar') return fecharMenu();
-        if (o === 'volume') return mudarVolume(10, true);   // toque/Enter: sobe e volta ao mudo depois de 100%
+        if (o === 'volume') return;                          // a barra se ajusta pelas setas ou puxando
         if (o === 'sair') return sair();
         if (o === 'salvar') {
             Promise.all([salvarSrm(), salvarEstado()]).then(function (r) {
@@ -151,7 +165,7 @@
         ev.preventDefault(); ev.stopPropagation();
         if (ev.key === 'ArrowDown') { focoMenu = (focoMenu + 1) % OPCOES.length; pintarMenu(); }
         else if (ev.key === 'ArrowUp') { focoMenu = (focoMenu + OPCOES.length - 1) % OPCOES.length; pintarMenu(); }
-        else if ((ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') && OPCOES[focoMenu].id === 'volume') mudarVolume(ev.key === 'ArrowLeft' ? -10 : 10);
+        else if ((ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') && OPCOES[focoMenu].id === 'volume') mudarVolume(ev.key === 'ArrowLeft' ? -5 : 5);
         else if (ev.key === 'Enter' || ev.key === ' ') escolher();
         else if (ev.key === 'Escape' || ev.key === 'Backspace') fecharMenu();
     }, true);
@@ -172,7 +186,7 @@
         else if (menuAberto) {
             if (novo('baixo')) { focoMenu = (focoMenu + 1) % OPCOES.length; pintarMenu(); }
             if (novo('cima')) { focoMenu = (focoMenu + OPCOES.length - 1) % OPCOES.length; pintarMenu(); }
-            if (OPCOES[focoMenu].id === 'volume' && (novo('esq') || novo('dir'))) mudarVolume(novo('esq') ? -10 : 10);
+            if (OPCOES[focoMenu].id === 'volume' && (novo('esq') || novo('dir'))) mudarVolume(novo('esq') ? -5 : 5);
             if (novo('a')) escolher();
             else if (novo('b') || novo('home')) fecharMenu();
         } else if (iniciado && (novo('combo') || novo('home'))) abrirMenu();
